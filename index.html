@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Robot Kontrolü</title>
+    <title>MENTECH Robot Kontrolü</title>
     <style>
         body {
             margin: 0;
@@ -29,32 +29,8 @@
             font-size: 1.875rem;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 1.5rem;
-            color: #fff;
-        }
-        .status-display {
             margin-bottom: 2rem;
-            padding: 1rem;
-            background-color: #4a5568;
-            border-radius: 0.5rem;
-            text-align: center;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
-        }
-        .status-display p {
-            margin: 0;
-            color: #cbd5e0;
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-        }
-        .status-display .status-text {
-            color: #48bb78;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        .message-text {
-            color: #90cdf4;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+            color: #fff;
         }
         .control-grid {
             display: grid;
@@ -81,13 +57,14 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            width: 100%; /* Ana kontrol butonları için %100 genişlik */
+            width: 100%;
             height: 100%;
             min-height: 60px;
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+ */
-            user-select: none; /* Standard syntax */
+            -webkit-user-select: none; /* Metin seçilmesini engelle */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* Mobil cihazlarda dokunma vurgusunu kaldır */
         }
         .button:hover {
             background-color: #3182ce;
@@ -106,7 +83,6 @@
         .button svg {
             height: 1.5rem;
             width: 1.5rem;
-            margin-bottom: 0.25rem;
             stroke: currentColor;
             stroke-width: 2;
         }
@@ -121,12 +97,6 @@
         }
         .button.purple:hover {
             background-color: #6b46c1;
-        }
-        .button.green {
-            background-color: #38a169;
-        }
-        .button.green:hover {
-            background-color: #2f855a;
         }
         .button.yellow {
             background-color: #d69e2e;
@@ -147,7 +117,7 @@
             background-color: #4a5568;
             border-radius: 0.5rem;
             box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
-            text-align: center; /* İçindeki butonları ortalamak için */
+            text-align: center;
         }
         .input-area h2 {
             font-size: 1.25rem;
@@ -155,42 +125,20 @@
             color: #fff;
             margin-bottom: 1rem;
         }
-        .input-area textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background-color: #1a202c;
-            color: #fff;
-            border: 1px solid #4a5568;
-            outline: none;
-            box-sizing: border-box;
-        }
-        .input-area textarea:focus {
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5), 0 0 0 6px rgba(66, 153, 225, 0.25);
-        }
-        .info-text {
-            color: #a0aec0;
-            font-size: 0.875rem;
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        /* Input alanları içindeki butonlar için özel stil */
         .input-area .button {
-            width: auto; /* Genişliği içeriğe göre ayarla */
-            min-height: 40px; /* Minimum yüksekliği azalt */
-            padding: 0.5rem 1.5rem; /* Dolguyu azalt */
-            font-size: 0.875rem; /* Yazı boyutunu küçült */
-            display: inline-flex; /* İçeriğe göre genişlemesini sağla ve ortalanabilir yap */
-            margin-top: 0.5rem; /* Üst boşluğu koru */
+            width: auto;
+            min-height: 40px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            margin-top: 0.5rem;
         }
         .input-area .button svg {
-            height: 1.25rem; /* İkon boyutunu küçült */
+            height: 1.25rem;
             width: 1.25rem;
-            margin-bottom: 0.125rem; /* İkon alt boşluğunu azalt */
+            margin-bottom: 0.125rem;
         }
 
-        /* Slider için stil */
         .slider-container {
             margin-top: 1rem;
             display: flex;
@@ -238,55 +186,48 @@
 </head>
 <body>
     <div class="container">
-        <h1>ESP32 Robot Kontrolü</h1>
-
-        <div class="status-display">
-            <p>Mevcut Durum:</p>
-            <p id="robotStatus" class="status-text">Durduruldu</p>
-            <p id="apiMessage" class="message-text"></p>
-        </div>
+        <h1>MENTECH</h1>
 
         <div class="control-grid">
             <button class="button grid-item-top"
-                    onmousedown="startContinuousMove('İleri')" ontouchstart="startContinuousMove('İleri')"
-                    onmouseup="stopContinuousMove()" ontouchend="stopContinuousMove()"
+                    onmousedown="startContinuousMove(event, 'İleri')" ontouchstart="startContinuousMove(event, 'İleri')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
                     id="forwardBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7" />
                 </svg>
             </button>
 
             <button class="button purple grid-item-left"
-                    onmousedown="startContinuousMove('Sola Dön')" ontouchstart="startContinuousMove('Sola Dön')"
-                    onmouseup="stopContinuousMove()" ontouchend="stopContinuousMove()"
+                    onmousedown="startContinuousMove(event, 'Sola Dön')" ontouchstart="startContinuousMove(event, 'Sola Dön')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
                     id="leftBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0M3 12h18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5 5-5M19 12H6" />
                 </svg>
             </button>
 
             <button class="button red grid-item-center" onclick="sendMovementCommand('Durduruldu')" id="stopBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                  <rect x="7" y="7" width="10" height="10" rx="2" ry="2" />
                 </svg>
             </button>
 
             <button class="button purple grid-item-right"
-                    onmousedown="startContinuousMove('Sağa Dön')" ontouchstart="startContinuousMove('Sağa Dön')"
-                    onmouseup="stopContinuousMove()" ontouchend="stopContinuousMove()"
+                    onmousedown="startContinuousMove(event, 'Sağa Dön')" ontouchstart="startContinuousMove(event, 'Sağa Dön')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
                     id="rightBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 9l3 3m0 0l-3 3m3-3H6m18 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 17l5-5-5-5M6 12h12" />
                 </svg>
             </button>
 
             <button class="button grid-item-bottom"
-                    onmousedown="startContinuousMove('Geri')" ontouchstart="startContinuousMove('Geri')"
-                    onmouseup="stopContinuousMove()" ontouchend="stopContinuousMove()"
+                    onmousedown="startContinuousMove(event, 'Geri')" ontouchstart="startContinuousMove(event, 'Geri')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
                     id="backwardBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M19 12l-7 7-7-7" />
                 </svg>
             </button>
         </div>
@@ -294,8 +235,8 @@
         <div class="input-area">
             <h2>⚙️ Motor Gücü</h2>
             <div class="slider-container">
-                <input type="range" id="motorSpeedSlider" min="30" max="100" value="100" oninput="updateMotorSpeed(this.value)">
-                <span id="motorSpeedValue" class="speed-value">100%</span>
+                <input type="range" id="motorSpeedSlider" min="30" max="100" value="30" oninput="updateMotorSpeed(this.value)">
+                <span id="motorSpeedValue" class="speed-value">30%</span>
             </div>
         </div>
 
@@ -303,82 +244,41 @@
             <h2>💡 Farlar</h2>
             <button class="button yellow" onclick="toggleHeadlights()" id="headlightsBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4.228 4.228l.707.707M1.636 18.364l.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12H2m15.364 4.364l.707.707M12 3a7.5 7.5 0 100 15 7.5 7.5 0 000-15z" />
+                    <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M20 12h2"/><path d="M2 12h2"/><path d="m18.364 5.636-.707.707"/><path d="m6.343 17.657-.707.707"/><path d="m5.636 5.636.707.707"/><path d="m17.657 17.657.707.707"/>
                 </svg>
                 Farları Aç / Kapat
             </button>
         </div>
 
-        <div class="input-area">
-            <h2>✨ Akıllı Yol Planlayıcı</h2>
-            <textarea id="pathInput" rows="3" placeholder="Örn: ileri 2 saniye, sonra sağa dön 1 saniye, sonra dur."></textarea>
-            <button class="button green" onclick="generatePathPlan()" id="planBtn">
-                Yol Planı Oluştur ve Yürüt
-            </button>
-        </div>
-
-        <div class="input-area">
-            <h2>✨ Yaratıcı Hareket Önerisi</h2>
-            <button class="button yellow" onclick="generateCreativeMovement()" id="creativeBtn">
-                Yaratıcı Bir Hareket Önerisi Al
-            </button>
-        </div>
-
-        <p class="info-text">
-          Bu uygulama, ESP32 tabanlı bir robot için basit bir kontrol arayüzü demosudur. Gerçek robot kontrolü için ESP32'de uygun firmware ve ağ iletişimi (Wi-Fi, Bluetooth) gereklidir. Yapay zeka destekli özellikler, Gemini API'si kullanılarak metin komutlarını robot hareketlerine dönüştürür.
-        </p>
     </div>
 
     <script>
         const BLYNK_AUTH_TOKEN = "N0zjD19SQgkbPqSTPM40PJjA9JqQAJck"; 
-        const GEMINI_API_KEY = "AIzaSyA-BZAMWG3oNvTybh1LY-St6Xoo4KC-E_E"; 
 
         const VIRTUAL_PIN_MOVEMENT = 'V0';
         const VIRTUAL_PIN_HEADLIGHTS = 'V1';
-        const VIRTUAL_PIN_MOTOR_SPEED = 'V2'; // Yeni sanal pin
+        const VIRTUAL_PIN_MOTOR_SPEED = 'V2'; 
 
-        const robotStatusElement = document.getElementById('robotStatus');
-        const apiMessageElement = document.getElementById('apiMessage');
-        const pathInput = document.getElementById('pathInput');
-        const forwardBtn = document.getElementById('forwardBtn');
-        const backwardBtn = document.getElementById('backwardBtn');
-        const leftBtn = document.getElementById('leftBtn');
-        const rightBtn = document.getElementById('rightBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const planBtn = document.getElementById('planBtn');
-        const creativeBtn = document.getElementById('creativeBtn');
-        const headlightsBtn = document.getElementById('headlightsBtn');
         const motorSpeedSlider = document.getElementById('motorSpeedSlider');
         const motorSpeedValueDisplay = document.getElementById('motorSpeedValue');
+        const headlightsBtn = document.getElementById('headlightsBtn');
 
-        let isLoading = false; 
         let headlightsOn = false; 
         let movementInterval; 
+        let currentActiveDirection = ''; // Hangi yönün aktif olduğunu tutar
 
+        // Durum mesajlarını kaldırıldığı için bu fonksiyonları basitleştiriyorum.
+        // Konsola loglama devam edecek.
         function setStatus(status, message = '') {
-            robotStatusElement.textContent = status;
-            apiMessageElement.textContent = message;
+            console.log(`Durum: ${status}, Mesaj: ${message}`);
         }
 
         function setButtonsDisabled(disabled) {
-            forwardBtn.disabled = disabled;
-            backwardBtn.disabled = disabled;
-            leftBtn.disabled = disabled;
-            rightBtn.disabled = disabled;
-            stopBtn.disabled = disabled;
-            planBtn.disabled = disabled;
-            creativeBtn.disabled = disabled;
-            pathInput.disabled = disabled;
             headlightsBtn.disabled = disabled;
-            motorSpeedSlider.disabled = disabled; // Slider'ı da devre dışı bırak
-            isLoading = disabled; 
+            motorSpeedSlider.disabled = disabled; 
         }
 
         async function sendMovementCommand(direction) {
-            if (isLoading && direction !== 'Durduruldu') { 
-                return;
-            }
-
             setStatus(direction, `Robot komutu gönderiliyor: ${direction}`);
             
             try {
@@ -389,21 +289,16 @@
 
                 if (response.ok) {
                     setStatus(direction, `Komut başarıyla gönderildi: ${direction}`);
-                    console.log(`Blynk'e komut gönderildi: ${direction}`);
                 } else {
                     const errorText = await response.text();
                     setStatus(direction, `Komut gönderilemedi: ${response.status} - ${errorText}`);
-                    console.error(`Blynk API'ye komut gönderilirken hata: ${response.status} - ${errorText}`);
                 }
             } catch (error) {
                 setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-                console.error('Ağ hatası:', error);
             }
         }
 
         async function toggleHeadlights() {
-            if (isLoading) return;
-
             setButtonsDisabled(true); 
             const newState = !headlightsOn; 
             setStatus('Farlar', `Farlar ${newState ? 'açılıyor' : 'kapanıyor'}...`);
@@ -417,21 +312,17 @@
                 if (response.ok) {
                     headlightsOn = newState; 
                     setStatus('Farlar', `Farlar başarıyla ${newState ? 'açıldı' : 'kapandı'}.`);
-                    console.log(`Blynk'e far komutu gönderildi: ${newState ? 'Açık' : 'Kapalı'}`);
                 } else {
                     const errorText = await response.text();
                     setStatus('Farlar', `Farlar komutu gönderilemedi: ${response.status} - ${errorText}`);
-                    console.error(`Blynk API'ye far komutu gönderilirken hata: ${response.status} - ${errorText}`);
                 }
             } catch (error) {
                 setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-                console.error('Ağ hatası:', error);
             } finally {
                 setButtonsDisabled(false); 
             }
         }
 
-        // Yeni: Motor hızını Blynk'e gönderen fonksiyon
         async function sendMotorSpeed(speedPercentage) {
             setStatus('Hız Ayarı', `Motor gücü ayarlanıyor: ${speedPercentage}%`);
             try {
@@ -441,179 +332,67 @@
                 );
                 if (response.ok) {
                     setStatus('Hız Ayarı', `Motor gücü başarıyla ayarlandı: ${speedPercentage}%`);
-                    console.log(`Blynk'e motor gücü gönderildi: ${speedPercentage}%`);
                 } else {
                     const errorText = await response.text();
                     setStatus('Hız Ayarı', `Motor gücü gönderilemedi: ${response.status} - ${errorText}`);
-                    console.error(`Blynk API'ye motor gücü gönderilirken hata: ${response.status} - ${errorText}`);
                 }
             } catch (error) {
                 setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-                console.error('Ağ hatası:', error);
             }
         }
 
-        // Slider değeri değiştiğinde çağrılan fonksiyon
         function updateMotorSpeed(value) {
             motorSpeedValueDisplay.textContent = `${value}%`;
             sendMotorSpeed(value);
         }
 
-        function startContinuousMove(direction) {
-            if (isLoading) return; 
+        function startContinuousMove(event, direction) {
+            event.preventDefault(); // Varsayılan davranışı (metin seçimi gibi) engelle
+            console.log(`startContinuousMove tetiklendi: ${direction}`);
 
+            // Eğer zaten bu yönde hareket ediyorsak veya başka bir yönde hareket ediyorsak, tekrar başlatma
+            if (currentActiveDirection === direction) {
+                console.log(`Zaten ${direction} yönünde hareket ediliyor.`);
+                return;
+            }
+            
+            // Önceki interval'i temizle (çift basmayı önlemek için)
             if (movementInterval) {
                 clearInterval(movementInterval);
+                movementInterval = null;
+                console.log("Önceki hareket interval'i temizlendi.");
             }
 
-            sendMovementCommand(direction); 
+            currentActiveDirection = direction; // Aktif yönü ayarla
+            sendMovementCommand(direction); // İlk komutu hemen gönder
 
+            // Her 200ms'de bir komutu tekrar gönder
             movementInterval = setInterval(() => {
                 sendMovementCommand(direction);
             }, 200); 
         }
 
-        function stopContinuousMove() {
-            if (isLoading) return; 
+        function stopContinuousMove(event) {
+            event.preventDefault(); // Varsayılan davranışı engelle
+            console.log("stopContinuousMove tetiklendi.");
 
             if (movementInterval) {
-                clearInterval(movementInterval); 
-                movementInterval = null; 
+                clearInterval(movementInterval); // Sürekli göndermeyi durdur
+                movementInterval = null; // Interval ID'sini sıfırla
+                console.log("Hareket interval'i durduruldu.");
             }
-            sendMovementCommand('Durduruldu'); 
-        }
-
-        async function executeCommands(commands) {
-            setButtonsDisabled(true); 
-            for (let i = 0; i < commands.length; i++) {
-                const { command, duration_ms } = commands[i];
-                setStatus(command, `${command} komutu yürütülüyor...`);
-                await sendMovementCommand(command); 
-                if (command !== 'Durduruldu') { 
-                    await new Promise(resolve => setTimeout(resolve, duration_ms || 1000)); 
-                }
-            }
-            await sendMovementCommand('Durduruldu'); 
-            setStatus('Durduruldu', 'Tüm komutlar tamamlandı.');
-            setButtonsDisabled(false); 
-        }
-
-        async function generatePathPlan() {
-            if (!pathInput.value.trim()) {
-                setStatus(robotStatusElement.textContent, 'Lütfen bir yol tarifi girin.');
-                return;
-            }
-
-            setButtonsDisabled(true);
-            setStatus(robotStatusElement.textContent, 'Yol planı oluşturuluyor...');
-
-            try {
-                const prompt = `Kullanıcı şu robot hareketini istiyor: "${pathInput.value}". Bu isteği bir dizi komuta dönüştür. Her komut "İleri", "Geri", "Sola Dön", "Sağa Dön" veya "Durduruldu" olmalı. Her komut için bir 'duration_ms' (milisaniye cinsinden süre) belirt. Örneğin, "ileri 2 saniye, sonra sağa dön 1 saniye, sonra dur". Eğer süre belirtilmezse varsayılan olarak 1000ms kullan. Yanıtı JSON formatında ver.`;
-
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: { 
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    "command": { "type": "STRING", "enum": ["İleri", "Geri", "Sola Dön", "Sağa Dön", "Durduruldu"] },
-                                    "duration_ms": { "type": "INTEGER" }
-                                },
-                                "required": ["command"]
-                            }
-                        }
-                    }
-                };
-
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const jsonText = result.candidates[0].content.parts[0].text;
-                    const parsedCommands = JSON.parse(jsonText); 
-                    setStatus(robotStatusElement.textContent, 'Yol planı başarıyla oluşturuldu. Yürütülüyor...');
-                    await executeCommands(parsedCommands); 
-                } else {
-                    setStatus(robotStatusElement.textContent, 'Yol planı oluşturulamadı. Lütfen tekrar deneyin.');
-                    console.error('API yanıt yapısı beklenenden farklı:', result);
-                }
-            } catch (error) {
-                setStatus('Hata!', `API hatası: ${error.message}`);
-                console.error('Yol planı oluşturulurken hata oluştu:', error);
-            } finally {
-                setButtonsDisabled(false);
+            
+            // Sadece eğer robot aktif bir yönde hareket ediyorsa Durduruldu komutunu gönder
+            if (currentActiveDirection !== '') {
+                sendMovementCommand('Durduruldu'); // Durdurma komutunu gönder
+                currentActiveDirection = ''; // Aktif yönü sıfırla
+                console.log("Durduruldu komutu gönderildi.");
             }
         }
 
-        async function generateCreativeMovement() {
-            setButtonsDisabled(true);
-            setStatus(robotStatusElement.textContent, 'Yaratıcı hareket önerisi alınıyor...');
-
-            try {
-                const prompt = `Bir robot için 3-5 adımdan oluşan kısa ve yaratıcı bir hareket dizisi oluştur. Her adım "İleri", "Geri", "Sola Dön", "Sağa Dön" veya "Durduruldu" komutlarından biri olmalı ve her komut için 500ms ile 2000ms arasında rastgele bir 'duration_ms' (milisaniye cinsinden süre) belirt. Yanıtı JSON formatında ver.`;
-                
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: { 
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    "command": { "type": "STRING", "enum": ["İleri", "Geri", "Sola Dön", "Sağa Dön", "Durduruldu"] },
-                                    "duration_ms": { "type": "INTEGER" }
-                                },
-                                "required": ["command", "duration_ms"]
-                            }
-                        }
-                    }
-                };
-
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const jsonText = result.candidates[0].content.parts[0].text;
-                    const parsedCommands = JSON.parse(jsonText);
-                    setStatus(robotStatusElement.textContent, 'Yaratıcı hareket önerisi alındı. Yürütülüyor...');
-                    await executeCommands(parsedCommands);
-                } else {
-                    setStatus(robotStatusElement.textContent, 'Yaratıcı hareket önerisi oluşturulamadı. Lütfen tekrar deneyin.');
-                    console.error('API yanıt yapısı beklenenden farklı:', result);
-                }
-            } catch (error) {
-                setStatus('Hata!', `API hatası: ${error.message}`);
-                console.error('Yaratıcı hareket oluşturulurken hata oluştu:', error);
-            } finally {
-                setButtonsDisabled(false);
-            }
-        }
-
-        // Sayfa yüklendiğinde motor hızını varsayılan olarak gönder
         window.onload = () => {
-            updateMotorSpeed(motorSpeedSlider.value); // Başlangıç değerini gönder
+            motorSpeedSlider.value = 30;
+            updateMotorSpeed(motorSpeedSlider.value);
         };
     </script>
 </body>
