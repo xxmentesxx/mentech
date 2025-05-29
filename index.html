@@ -1,523 +1,199 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MENTECH Robot Kontrolü</title>
-    <style>
-        /* Ana sayfa ve arka plan stilleri */
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            background: linear-gradient(to bottom right, #1a202c, #2d3748); /* Koyu gradyan arka plan */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh; /* Tam ekran yüksekliği */
-            padding: 1rem;
-            color: #fff; /* Beyaz metin rengi */
-            /* position: relative; Removed from body, now container is relative */
-        }
-        /* Ana içerik kapsayıcısı */
-        .container {
-            background-color: #2d3748; /* Koyu gri arka plan */
-            padding: 2rem;
-            border-radius: 0.75rem; /* Yuvarlak köşeler */
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); /* Gölge efekti */
-            width: 100%;
-            max-width: 28rem; /* Maksimum genişlik */
-            border: 1px solid #4a5568; /* Kenarlık */
-            position: relative; /* Farlar butonu için referans noktası */
-        }
-        /* Başlık stili */
-        h1 {
-            font-size: 1.875rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #fff;
-        }
-        /* Alt başlık stili (Kamera Kontrolü için) */
-        h3 {
-            font-size: 1rem;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            color: #fff;
-        }
-        /* Kontrol düğmeleri ızgara düzeni */
-        .control-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 eşit sütun */
-            gap: 1rem; /* Boşluk */
-            margin-bottom: 2rem;
-            justify-items: center;
-            align-items: center;
-        }
-        /* Tüm düğmeler için genel stil */
-        .button {
-            background-color: #4299e1; /* Mavi arka plan */
-            color: white;
-            font-weight: bold;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem; /* Yuvarlak köşeler */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease-in-out; /* Yumuşak geçişler */
-            transform: scale(1);
-            cursor: pointer;
-            border: none;
-            outline: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            width: 100%;
-            height: 100%;
-            min-height: 60px;
-            -webkit-user-select: none; /* Metin seçilmesini engelle */
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent; /* Mobil cihazlarda dokunma vurgusunu kaldır */
-        }
-        /* Düğme üzerine gelindiğinde */
-        .button:hover {
-            background-color: #3182ce;
-            transform: scale(1.05);
-        }
-        /* Düğmeye basıldığında */
-        .button:active {
-            transform: scale(0.98);
-        }
-        /* Düğme odaklandığında */
-        .button:focus {
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5), 0 0 0 6px rgba(66, 153, 225, 0.25);
-        }
-        /* Devre dışı bırakılmış düğmeler */
-        .button[disabled] {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        /* Düğme içindeki SVG ikonları */
-        .button svg {
-            height: 1.5rem;
-            width: 1.5rem;
-            stroke: currentColor;
-            stroke-width: 2;
-        }
-        /* Kırmızı düğme stili */
-        .button.red {
-            background-color: #e53e3e;
-        }
-        .button.red:hover {
-            background-color: #c53030;
-        }
-        /* Mor düğme stili */
-        .button.purple {
-            background-color: #805ad5;
-        }
-        .button.purple:hover {
-            background-color: #6b46c1;
-        }
-        /* Sarı düğme stili */
-        .button.yellow {
-            background-color: #d69e2e;
-        }
-        .button.yellow:hover {
-            background-color: #b7791f;
-        }
-        /* Izgara öğelerinin pozisyonları */
-        .grid-item-top { grid-column: 2 / 3; grid-row: 1 / 2; }
-        .grid-item-left { grid-column: 1 / 2; grid-row: 2 / 3; }
-        .grid-item-center { grid-column: 2 / 3; grid-row: 2 / 3; }
-        .grid-item-right { grid-column: 3 / 4; grid-row: 2 / 3; }
-        .grid-item-bottom { grid-column: 2 / 3; grid-row: 3 / 4; }
+#define BLYNK_TEMPLATE_ID   "TMPL6j2e8h6uR"
+#define BLYNK_TEMPLATE_NAME "Robot1"
+#define BLYNK_AUTH_TOKEN    "N0zjD19SQgkbPqSTPM40PJjA9JqQAJck"
 
-        /* Giriş alanları için genel stil */
-        .input-area {
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background-color: #4a5568; /* Koyu gri arka plan */
-            border-radius: 0.5rem;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-        /* Giriş alanı başlıkları */
-        .input-area h2 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 1rem;
-        }
-        /* Giriş alanı içindeki düğmeler */
-        .input-area .button {
-            width: auto; /* Genişliği içeriğe göre ayarla */
-            min-height: 40px; /* Minimum yüksekliği azalt */
-            padding: 0.5rem 1.5rem; /* Dolguyu azalt */
-            font-size: 0.875rem; /* Yazı boyutunu küçült */
-            display: inline-flex; /* İçeriğe göre genişlemesini sağla ve ortalanabilir yap */
-            margin-top: 0.5rem; /* Üst boşluğu koru */
-        }
-        .input-area .button svg {
-            height: 1.25rem; /* İkon boyutunu küçült */
-            width: 1.25rem;
-            margin-bottom: 0.125rem; /* İkon alt boşluğunu azalt */
-        }
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
 
-        /* Kaydırıcı (Slider) kapsayıcısı */
-        .slider-container {
-            margin-top: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.5rem;
-            background-color: #2d3748;
-            border-radius: 0.5rem;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
-        }
-        /* Kaydırıcı input stili */
-        .slider-container input[type="range"] {
-            -webkit-appearance: none; /* Varsayılan görünümü kaldır */
-            width: 100%;
-            height: 8px;
-            background: #4a5568; /* Kaydırıcı yolu rengi */
-            outline: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        /* Kaydırıcı başparmak (thumb) stili (Webkit - Chrome/Safari) */
-        .slider-container input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%; /* Yuvarlak başparmak */
-            background: #4299e1; /* Mavi başparmak rengi */
-            cursor: pointer;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Mavi dış halka */
-        }
-        /* Kaydırıcı başparmak (thumb) stili (Mozilla - Firefox) */
-        .slider-container input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #4299e1;
-            cursor: pointer;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        }
-        /* Kaydırıcı değer göstergesi */
-        .slider-container .speed-value {
-            font-weight: bold;
-            color: #fff;
-            min-width: 40px;
-            text-align: right;
-        }
+char ssid[] = "COMOLOKKO 2.4";
+char pass[] = "papipapi-135246";
 
-        /* Farlar butonu için yeni konumlandırma (container'a göre) */
-        .headlights-floating-button {
-            position: absolute; /* Kapsayıcıya göre konumlandır */
-            top: 1rem; /* Kapsayıcının üstünden 1rem boşluk */
-            right: 1rem; /* Kapsayıcının sağından 1rem boşluk */
-            width: 48px; /* Daha küçük boyut */
-            height: 48px; /* Daha küçük boyut */
-            padding: 0.5rem; /* İç boşluğu azalt */
-            border-radius: 50%; /* Tamamen yuvarlak */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10; /* Diğer elementlerin üzerinde görünmesini sağla */
-        }
-        .headlights-floating-button svg {
-            height: 1.5rem; /* İkon boyutu */
-            width: 1.5rem; /* İkon boyutu */
-            margin-bottom: 0; /* Metin olmadığı için boşluk yok */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>MENTECH</h1>
+// TB6612FNG Pin Tanımlamaları (esp32-tb6612-wiring belgesine göre güncellendi)
+// Sağ Motor (TB6612FNG'nin A kanalı)
+const int RIGHT_PWM_PIN = 18; // PWMA
+const int RIGHT_IN1_PIN = 16; // AIN1
+const int RIGHT_IN2_PIN = 17; // AIN2
 
-        <button class="button yellow headlights-floating-button" onclick="toggleHeadlights()" id="headlightsBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M20 12h2"/><path d="M2 12h2"/><path d="m18.364 5.636-.707.707"/><path d="m6.343 17.657-.707.707"/><path d="m5.636 5.636.707.707"/><path d="m17.657 17.657.707.707"/>
-            </svg>
-        </button>
+// Sol Motor (TB6612FNG'nin B kanalı)
+const int LEFT_PWM_PIN = 5;  // PWMB
+const int LEFT_IN1_PIN = 7;  // BIN1
+const int LEFT_IN2_PIN = 6;  // BIN2
 
-        <div class="control-grid">
-            <button class="button grid-item-top"
-                    onmousedown="startContinuousMove(event, 'İleri')" ontouchstart="startContinuousMove(event, 'İleri')"
-                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
-                    id="forwardBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-            </button>
+const int STBY = 15; // Sürücü Bekleme Modu
 
-            <button class="button purple grid-item-left"
-                    onmousedown="startContinuousMove(event, 'Sola Dön')" ontouchstart="startContinuousMove(event, 'Sola Dön')"
-                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
-                    id="leftBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5 5-5M19 12H6" />
-                </svg>
-            </button>
+const int LED_GREEN_PIN = 40;
+const int LED_WHITE_1_PIN = 41;
+const int LED_WHITE_2_PIN = 42;
 
-            <button class="button red grid-item-center" onclick="sendMovementCommand('Durduruldu')" id="stopBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <rect x="7" y="7" width="10" height="10" rx="2" ry="2" />
-                </svg>
-            </button>
+int currentMotorSpeedPWM = 255; // Başlangıçta tam güç (0-255 PWM değeri)
 
-            <button class="button purple grid-item-right"
-                    onmousedown="startContinuousMove(event, 'Sağa Dön')" ontouchstart="startContinuousMove(event, 'Sağa Dön')"
-                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
-                    id="rightBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 17l5-5-5-5M6 12h12" />
-                </svg>
-            </button>
+// Motorları kontrol eden fonksiyon
+// leftMotorDir: Sol motorun yönü (1=ileri, -1=geri, 0=dur)
+// rightMotorDir: Sağ motorun yönü (1=ileri, -1=geri, 0=dur)
+void setMotors(int leftMotorDir, int rightMotorDir) {
+  // Sol Motoru Kontrol Et
+  if (leftMotorDir == 1) { // İleri
+    digitalWrite(LEFT_IN1_PIN, HIGH);
+    digitalWrite(LEFT_IN2_PIN, LOW);
+  } else if (leftMotorDir == -1) { // Geri
+    digitalWrite(LEFT_IN1_PIN, LOW);
+    digitalWrite(LEFT_IN2_PIN, HIGH);
+  } else { // Dur
+    digitalWrite(LEFT_IN1_PIN, LOW);
+    digitalWrite(LEFT_IN2_PIN, LOW);
+  }
+  analogWrite(LEFT_PWM_PIN, currentMotorSpeedPWM); // Sol motor hızını ayarla
 
-            <button class="button grid-item-bottom"
-                    onmousedown="startContinuousMove(event, 'Geri')" ontouchstart="startContinuousMove(event, 'Geri')"
-                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
-                    id="backwardBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M19 12l-7 7-7-7" />
-                </svg>
-            </button>
-        </div>
+  // Sağ Motoru Kontrol Et
+  if (rightMotorDir == 1) { // İleri
+    digitalWrite(RIGHT_IN1_PIN, HIGH);
+    digitalWrite(RIGHT_IN2_PIN, LOW);
+  } else if (rightMotorDir == -1) { // Geri
+    digitalWrite(RIGHT_IN1_PIN, LOW);
+    digitalWrite(RIGHT_IN2_PIN, HIGH);
+  } else { // Dur
+    digitalWrite(RIGHT_IN1_PIN, LOW);
+    digitalWrite(RIGHT_IN2_PIN, LOW);
+  }
+  analogWrite(RIGHT_PWM_PIN, currentMotorSpeedPWM); // Sağ motor hızını ayarla
+}
 
-        <div class="input-area">
-            <h2>⚙️ Motor Gücü</h2>
-            <div class="slider-container">
-                <input type="range" id="motorSpeedSlider" min="30" max="100" value="30" oninput="updateMotorSpeed(this.value)">
-                <span id="motorSpeedValue" class="speed-value">30%</span>
-            </div>
-        </div>
+BLYNK_WRITE(V0) {
+  String command = param.asString();
 
-        <div class="input-area">
-            <h2>📷 Kamera Kontrolü (Pan/Tilt)</h2>
-            <h3>Sağ / Sol (Pan)</h3>
-            <div class="slider-container">
-                <input type="range" id="panSlider" min="0" max="180" value="90" oninput="updatePanAngle(this.value)">
-                <span id="panAngleValue" class="speed-value">90°</span>
-            </div>
-            <h3>Yukarı / Aşağı (Tilt)</h3>
-            <div class="slider-container">
-                <input type="range" id="tiltSlider" min="0" max="180" value="90" oninput="updateTiltAngle(this.value)">
-                <span id="tiltAngleValue" class="speed-value">90°</span>
-            </div>
-        </div>
+  Serial.print("Blynk komut (V0): ");
+  Serial.println(command);
 
-    </div>
+  digitalWrite(STBY, HIGH); // Motor sürücüyü aktif et
 
-    <script>
-        // Blynk kimlik doğrulama belirteci (Auth Token)
-        const BLYNK_AUTH_TOKEN = "N0zjD19SQgkbPqSTPM40PJjA9JqQAJck"; 
+  if (command == "İleri") {
+    setMotors(1, 1); // Sol ileri, Sağ ileri
+  } else if (command == "Geri") {
+    setMotors(-1, -1); // Sol geri, Sağ geri
+  } else if (command == "Sola Dön") {
+    // Robotun sola dönmesi için sol motor geri, sağ motor ileri gitmeli.
+    // Eğer ters dönüyorsa, bu komutları değiştiriyoruz.
+    // Kullanıcının deneyimine göre düzeltme: Sol motor ileri, Sağ motor geri (Robot sağa döner)
+    setMotors(1, -1); 
+  } else if (command == "Sağa Dön") {
+    // Robotun sağa dönmesi için sol motor ileri, sağ motor geri gitmeli.
+    // Eğer ters dönüyorsa, bu komutları değiştiriyoruz.
+    // Kullanıcının deneyimine göre düzeltme: Sol motor geri, Sağ motor ileri (Robot sola döner)
+    setMotors(-1, 1);
+  } else if (command == "Durduruldu") {
+    setMotors(0, 0); // Tüm motorları durdur
+    digitalWrite(STBY, LOW); // Sürücüyü bekleme moduna al
+  }
+}
 
-        // Blynk sanal pin tanımlamaları
-        const VIRTUAL_PIN_MOVEMENT = 'V0';
-        const VIRTUAL_PIN_HEADLIGHTS = 'V1';
-        const VIRTUAL_PIN_MOTOR_SPEED = 'V2'; 
-        const VIRTUAL_PIN_PAN_SERVO = 'V3';   // Pan Servo için sanal pin
-        const VIRTUAL_PIN_TILT_SERVO = 'V4';  // Tilt Servo için sanal pin
+BLYNK_WRITE(V1) {
+  int state = param.asInt();
 
-        // HTML elementlerini JavaScript değişkenlerine atama
-        const motorSpeedSlider = document.getElementById('motorSpeedSlider');
-        const motorSpeedValueDisplay = document.getElementById('motorSpeedValue');
-        const headlightsBtn = document.getElementById('headlightsBtn'); // Farlar butonu
+  Serial.print("Blynk Farlar komutu (V1): ");
+  Serial.println(state);
 
-        const panSlider = document.getElementById('panSlider');
-        const panAngleValueDisplay = document.getElementById('panAngleValue');
-        const tiltSlider = document.getElementById('tiltSlider');
-        const tiltAngleValueDisplay = document.getElementById('tiltAngleValue');
+  if (state == 1) {
+    digitalWrite(LED_WHITE_1_PIN, HIGH);
+    digitalWrite(LED_WHITE_2_PIN, HIGH);
+    Serial.println("Farlar Açık");
+  } else {
+    digitalWrite(LED_WHITE_1_PIN, LOW);
+    digitalWrite(LED_WHITE_2_PIN, LOW);
+    Serial.println("Farlar Kapalı");
+  }
+}
 
-        // Durum değişkenleri
-        let headlightsOn = false; 
-        let movementInterval; 
-        let currentActiveDirection = ''; // Hangi yönün aktif olduğunu tutar
+// Blynk V2 Sanal Pini okuyucu (Motor Gücü Ayarı)
+BLYNK_WRITE(V2) {
+  int percentage = param.asInt(); // Gelen yüzde değeri (30-100)
 
-        // Durum mesajlarını konsola yazdırma fonksiyonu
-        function setStatus(status, message = '') {
-            console.log(`Durum: ${status}, Mesaj: ${message}`);
-        }
+  // Yüzdeyi 0-255 PWM değerine dönüştür
+  // %30 -> 255 * 0.30 = 76.5 (yaklaşık 77)
+  // %100 -> 255 * 1.00 = 255
+  currentMotorSpeedPWM = map(percentage, 30, 100, 77, 255);
 
-        // Butonları ve slider'ları devre dışı bırakma/etkinleştirme
-        function setButtonsDisabled(disabled) {
-            // Tüm kontrol düğmelerini ve slider'ları devre dışı bırak/etkinleştir
-            document.querySelectorAll('.button, input[type="range"]').forEach(element => {
-                // Farlar butonu ayrı ele alınacağından, burada hareket ve hız butonlarını devre dışı bırakalım.
-                // headlightsBtn.disabled = disabled; // Bu satırı kaldırdık, çünkü artık ayrı bir yerde
-                if (element.id !== 'headlightsBtn') { // Farlar butonunu hariç tut
-                    element.disabled = disabled;
-                }
-            });
-        }
+  Serial.print("Blynk Motor Gücü (V2): ");
+  Serial.print(percentage);
+  Serial.print("% -> PWM: ");
+  Serial.println(currentMotorSpeedPWM);
+}
 
-        // Robot hareket komutlarını Blynk'e gönderme
-        async function sendMovementCommand(direction) {
-            setStatus(direction, `Robot komutu gönderiliyor: ${direction}`);
-            
-            try {
-                // Blynk HTTP API'sine GET isteği gönderme
-                const response = await fetch(
-                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_MOVEMENT}=${direction}`,
-                    { method: 'GET' }
-                );
+// Yeni: Servo kontrolü için V3 sanal pini
+BLYNK_WRITE(V3) {
+  int angle = param.asInt(); // Gelen açı değeri (0-180)
+  // Burada pan servonuzu kontrol etmek için gerekli kodu ekleyin
+  // Örneğin: panServo.write(angle);
+  Serial.print("Pan Servo Açısı (V3): ");
+  Serial.println(angle);
+}
 
-                if (response.ok) {
-                    setStatus(direction, `Komut başarıyla gönderildi: ${direction}`);
-                } else {
-                    const errorText = await response.text();
-                    setStatus(direction, `Komut gönderilemedi: ${response.status} - ${errorText}`);
-                }
-            } catch (error) {
-                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-            }
-        }
+// Yeni: Servo kontrolü için V4 sanal pini
+BLYNK_WRITE(V4) {
+  int angle = param.asInt(); // Gelen açı değeri (0-180)
+  // Burada tilt servonuzu kontrol etmek için gerekli kodu ekleyin
+  // Örneğin: tiltServo.write(angle);
+  Serial.print("Tilt Servo Açısı (V4): ");
+  Serial.println(angle);
+}
 
-        // Farları açma/kapatma komutunu Blynk'e gönderme
-        async function toggleHeadlights() {
-            // Farlar butonunu sadece bu fonksiyonun başında devre dışı bırakıp sonunda etkinleştireceğiz.
-            headlightsBtn.disabled = true; 
-            const newState = !headlightsOn; // Farların yeni durumu
-            setStatus('Farlar', `Farlar ${newState ? 'açılıyor' : 'kapanıyor'}...`);
+void setup() {
+  Serial.begin(115200);
 
-            try {
-                // Blynk HTTP API'sine GET isteği gönderme (1: açık, 0: kapalı)
-                const response = await fetch(
-                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_HEADLIGHTS}=${newState ? 1 : 0}`,
-                    { method: 'GET' }
-                );
+  // Pinleri çıkış olarak ayarla
+  pinMode(RIGHT_PWM_PIN, OUTPUT);
+  pinMode(RIGHT_IN1_PIN, OUTPUT);
+  pinMode(RIGHT_IN2_PIN, OUTPUT);
+  pinMode(LEFT_PWM_PIN, OUTPUT);
+  pinMode(LEFT_IN1_PIN, OUTPUT);
+  pinMode(LEFT_IN2_PIN, OUTPUT);
+  pinMode(STBY, OUTPUT);
 
-                if (response.ok) {
-                    headlightsOn = newState; // Durumu güncelle
-                    setStatus('Farlar', `Farlar başarıyla ${newState ? 'açıldı' : 'kapandı'}.`);
-                } else {
-                    const errorText = await response.text();
-                    setStatus('Farlar', `Farlar komutu gönderilemedi: ${response.status} - ${errorText}`);
-                }
-            } catch (error) {
-                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-            } finally {
-                headlightsBtn.disabled = false; // İşlem bitince farlar butonunu etkinleştir
-            }
-        }
+  pinMode(LED_GREEN_PIN, OUTPUT);
+  pinMode(LED_WHITE_1_PIN, OUTPUT);
+  pinMode(LED_WHITE_2_PIN, OUTPUT);
 
-        // Motor hız komutunu Blynk'e gönderme
-        async function sendMotorSpeed(speedPercentage) {
-            setStatus('Hız Ayarı', `Motor gücü ayarlanıyor: ${speedPercentage}%`);
-            try {
-                const response = await fetch(
-                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_MOTOR_SPEED}=${speedPercentage}`,
-                    { method: 'GET' }
-                );
-                if (response.ok) {
-                    setStatus('Hız Ayarı', `Motor gücü başarıyla ayarlandı: ${speedPercentage}%`);
-                } else {
-                    const errorText = await response.text();
-                    setStatus('Hız Ayarı', `Motor gücü gönderilemedi: ${response.status} - ${errorText}`);
-                }
-            } catch (error) {
-                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-            }
-        }
+  digitalWrite(STBY, LOW); // Başlangıçta sürücüyü pasif yap
+  digitalWrite(LED_GREEN_PIN, LOW); // Başlangıçta tüm LED'leri kapat
+  digitalWrite(LED_WHITE_1_PIN, LOW);
+  digitalWrite(LED_WHITE_2_PIN, LOW);
 
-        // Motor hızı slider'ı değiştiğinde çağrılır
-        function updateMotorSpeed(value) {
-            motorSpeedValueDisplay.textContent = `${value}%`;
-            sendMotorSpeed(value);
-        }
+  Serial.print("WiFi baglaniliyor: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, pass);
+  
+  int attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 40) {
+    digitalWrite(LED_GREEN_PIN, HIGH);
+    delay(200);
+    digitalWrite(LED_GREEN_PIN, LOW);
+    delay(300);
+    Serial.print(".");
+    attempts++;
+  }
 
-        // Servo açı komutlarını Blynk'e gönderme
-        async function sendServoAngle(pin, angle, type) {
-            console.log(`${type} Servo açısı ayarlanıyor: ${angle}°`);
-            try {
-                const response = await fetch(
-                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${pin}=${angle}`,
-                    { method: 'GET' }
-                );
-                if (response.ok) {
-                    console.log(`${type} Servo açısı başarıyla ayarlandı: ${angle}°`);
-                } else {
-                    const errorText = await response.text();
-                    console.error(`${type} Servo açısı gönderilemedi: ${response.status} - ${errorText}`);
-                }
-            } catch (error) {
-                console.error('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
-            }
-        }
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi baglantisi basarili!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+    digitalWrite(LED_GREEN_PIN, HIGH); // Wi-Fi bağlıyken yeşil LED'i sabit yak
+  } else {
+    Serial.println("\nWiFi baglantisi basarisiz.");
+    Serial.print("Baglanilamayan SSID: ");
+    Serial.println(ssid);
+    for(int i=0; i<10; i++){
+      digitalWrite(LED_GREEN_PIN, HIGH);
+      delay(100);
+      digitalWrite(LED_GREEN_PIN, LOW);
+      delay(100);
+    }
+  }
 
-        // Pan slider'ı değiştiğinde çağrılır
-        function updatePanAngle(value) {
-            panAngleValueDisplay.textContent = `${value}°`;
-            sendServoAngle(VIRTUAL_PIN_PAN_SERVO, value, 'Pan');
-        }
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  Serial.println("Blynk baglaniyor...");
+}
 
-        // Tilt slider'ı değiştiğinde çağrılır
-        function updateTiltAngle(value) {
-            tiltAngleValueDisplay.textContent = `${value}°`;
-            sendServoAngle(VIRTUAL_PIN_TILT_SERVO, value, 'Tilt');
-        }
-
-        // Sürekli hareket komutunu başlatma (basılı tutma)
-        function startContinuousMove(event, direction) {
-            event.preventDefault(); // Varsayılan davranışı (metin seçimi gibi) engelle
-            console.log(`startContinuousMove tetiklendi: ${direction}`);
-
-            if (currentActiveDirection === direction) {
-                console.log(`Zaten ${direction} yönünde hareket ediliyor.`);
-                return;
-            }
-            
-            if (movementInterval) {
-                clearInterval(movementInterval); // Önceki interval'i temizle
-                movementInterval = null;
-                console.log("Önceki hareket interval'i temizlendi.");
-            }
-
-            currentActiveDirection = direction; // Aktif yönü ayarla
-            sendMovementCommand(direction); // İlk komutu hemen gönder
-
-            // Her 200ms'de bir komutu tekrar gönder
-            movementInterval = setInterval(() => {
-                sendMovementCommand(direction);
-            }, 200); 
-        }
-
-        // Sürekli hareket komutunu durdurma (bırakma)
-        function stopContinuousMove(event) {
-            event.preventDefault(); // Varsayılan davranışı engelle
-            console.log("stopContinuousMove tetiklendi.");
-
-            if (movementInterval) {
-                clearInterval(movementInterval); // Sürekli göndermeyi durdur
-                movementInterval = null; // Interval ID'sini sıfırla
-                console.log("Hareket interval'i durduruldu.");
-            }
-            
-            // Sadece eğer robot aktif bir yönde hareket ediyorsa Durduruldu komutunu gönder
-            if (currentActiveDirection !== '') {
-                sendMovementCommand('Durduruldu'); // Durdurma komutunu gönder
-                currentActiveDirection = ''; // Aktif yönü sıfırla
-                console.log("Durduruldu komutu gönderildi.");
-            }
-        }
-
-        // Sayfa yüklendiğinde başlangıç ayarları
-        window.onload = () => {
-            motorSpeedSlider.value = 30;
-            updateMotorSpeed(motorSpeedSlider.value);
-            
-            panSlider.value = 90; // Başlangıçta 90 derece
-            updatePanAngle(panSlider.value);
-            tiltSlider.value = 90; // Başlangıçta 90 derece
-            updateTiltAngle(tiltSlider.value);
-        };
-    </script>
-</body>
-</html>
+void loop() {
+  Blynk.run();
+}
