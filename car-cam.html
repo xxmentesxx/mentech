@@ -1,70 +1,399 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Robot Kontrol Paneli</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    button {
-      width: 120px; height: 50px;
-      margin: 5px;
-      font-size: 16px;
-    }
-    #speed { width: 250px; }
-    #speedValue { font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MENTECH Robot Kontrolü</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background: linear-gradient(to bottom right, #1a202c, #2d3748);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            color: #fff;
+        }
+        .container {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 28rem;
+            border: 1px solid #4a5568;
+        }
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-items: center;
+            align-items: center;
+        }
+        .button {
+            background-color: #4299e1;
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+            min-height: 60px;
+            -webkit-user-select: none; /* Metin seçilmesini engelle */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* Mobil cihazlarda dokunma vurgusunu kaldır */
+        }
+        .button:hover {
+            background-color: #3182ce;
+            transform: scale(1.05);
+        }
+        .button:active {
+            transform: scale(0.98);
+        }
+        .button:focus {
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5), 0 0 0 6px rgba(66, 153, 225, 0.25);
+        }
+        .button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .button svg {
+            height: 1.5rem;
+            width: 1.5rem;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+        .button.red {
+            background-color: #e53e3e;
+        }
+        .button.red:hover {
+            background-color: #c53030;
+        }
+        .button.purple {
+            background-color: #805ad5;
+        }
+        .button.purple:hover {
+            background-color: #6b46c1;
+        }
+        .button.yellow {
+            background-color: #d69e2e;
+        }
+        .button.yellow:hover {
+            background-color: #b7791f;
+        }
+        /* Grid Pozisyonları */
+        .grid-item-top { grid-column: 2 / 3; grid-row: 1 / 2; }
+        .grid-item-left { grid-column: 1 / 2; grid-row: 2 / 3; }
+        .grid-item-center { grid-column: 2 / 3; grid-row: 2 / 3; }
+        .grid-item-right { grid-column: 3 / 4; grid-row: 2 / 3; }
+        .grid-item-bottom { grid-column: 2 / 3; grid-row: 3 / 4; }
+
+        .input-area {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: #4a5568;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .input-area h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .input-area .button {
+            width: auto;
+            min-height: 40px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            margin-top: 0.5rem;
+        }
+        .input-area .button svg {
+            height: 1.25rem;
+            width: 1.25rem;
+            margin-bottom: 0.125rem;
+        }
+
+        .slider-container {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+        }
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4a5568;
+            outline: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4299e1;
+            cursor: pointer;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4299e1;
+            cursor: pointer;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .slider-container .speed-value {
+            font-weight: bold;
+            color: #fff;
+            min-width: 40px;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-  <h1>Robot Kontrol</h1>
+    <div class="container">
+        <h1>MENTECH</h1>
 
-  <!-- Hareket Butonları -->
-  <div>
-    <button id="forward">İleri</button>
-    <button id="backward">Geri</button>
-    <button id="left">Sola Dön</button>
-    <button id="right">Sağa Dön</button>
-    <button id="stop">Durdur</button>
-  </div>
+        <div class="control-grid">
+            <button class="button grid-item-top"
+                    onmousedown="startContinuousMove(event, 'İleri')" ontouchstart="startContinuousMove(event, 'İleri')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
+                    id="forwardBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+            </button>
 
-  <!-- Hız Kontrol Slider'ı -->
-  <div style="margin-top:20px;">
-    <label for="speed">Hız (%30–100): </label>
-    <input type="range" id="speed" min="30" max="100" value="50">
-    <span id="speedValue">50</span>%
-  </div>
+            <button class="button purple grid-item-left"
+                    onmousedown="startContinuousMove(event, 'Sola Dön')" ontouchstart="startContinuousMove(event, 'Sola Dön')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
+                    id="leftBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5 5-5M19 12H6" />
+                </svg>
+            </button>
 
-  <script>
-    // 1) Değiştirmeniz gerekenler
-    const AUTH_TOKEN = 'N0zjD19SQgkbPqSTPM40PJjA9JqQAJck';
-    const API_URL    = 'https://blynk.cloud/external/api/update';
+            <button class="button red grid-item-center" onclick="sendMovementCommand('Durduruldu')" id="stopBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <rect x="7" y="7" width="10" height="10" rx="2" ry="2" />
+                </svg>
+            </button>
 
-    // 2) Komut gönderme fonksiyonu
-    function sendCommand(pin, value) {
-      fetch(`${API_URL}?token=${AUTH_TOKEN}&${pin}=${encodeURIComponent(value)}`)
-        .then(res => console.log(`Gönderildi: ${pin}=${value}`, res.status))
-        .catch(err => console.error(err));
-    }
+            <button class="button purple grid-item-right"
+                    onmousedown="startContinuousMove(event, 'Sağa Dön')" ontouchstart="startContinuousMove(event, 'Sağa Dön')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
+                    id="rightBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 17l5-5-5-5M6 12h12" />
+                </svg>
+            </button>
 
-    // 3) Butonlara olay dinleyici atama
-    document.getElementById('forward')
-      .addEventListener('click', () => sendCommand('V0', 'İleri'));
-    document.getElementById('backward')
-      .addEventListener('click', () => sendCommand('V0', 'Geri'));
-    document.getElementById('left')
-      .addEventListener('click', () => sendCommand('V0', 'Sola Dön'));
-    document.getElementById('right')
-      .addEventListener('click', () => sendCommand('V0', 'Sağa Dön'));
-    document.getElementById('stop')
-      .addEventListener('click', () => sendCommand('V0', 'Durduruldu'));
+            <button class="button grid-item-bottom"
+                    onmousedown="startContinuousMove(event, 'Geri')" ontouchstart="startContinuousMove(event, 'Geri')"
+                    onmouseup="stopContinuousMove(event)" ontouchend="stopContinuousMove(event)" onmouseleave="stopContinuousMove(event)"
+                    id="backwardBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+            </button>
+        </div>
 
-    // 4) Slider ile hız güncelleme
-    const speedSlider  = document.getElementById('speed');
-    const speedDisplay = document.getElementById('speedValue');
+        <div class="input-area">
+            <h2>⚙️ Motor Gücü</h2>
+            <div class="slider-container">
+                <input type="range" id="motorSpeedSlider" min="30" max="100" value="30" oninput="updateMotorSpeed(this.value)">
+                <span id="motorSpeedValue" class="speed-value">30%</span>
+            </div>
+        </div>
 
-    speedSlider.addEventListener('input', () => {
-      speedDisplay.textContent = speedSlider.value;
-      sendCommand('V2', speedSlider.value);
-    });
-  </script>
+        <div class="input-area">
+            <h2>💡 Farlar</h2>
+            <button class="button yellow" onclick="toggleHeadlights()" id="headlightsBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M20 12h2"/><path d="M2 12h2"/><path d="m18.364 5.636-.707.707"/><path d="m6.343 17.657-.707.707"/><path d="m5.636 5.636.707.707"/><path d="m17.657 17.657.707.707"/>
+                </svg>
+                Farları Aç / Kapat
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const BLYNK_AUTH_TOKEN = "N0zjD19SQgkbPqSTPM40PJjA9JqQAJck"; 
+
+        const VIRTUAL_PIN_MOVEMENT = 'V0';
+        const VIRTUAL_PIN_HEADLIGHTS = 'V1';
+        const VIRTUAL_PIN_MOTOR_SPEED = 'V2'; 
+
+        const motorSpeedSlider = document.getElementById('motorSpeedSlider');
+        const motorSpeedValueDisplay = document.getElementById('motorSpeedValue');
+        const headlightsBtn = document.getElementById('headlightsBtn');
+
+        let headlightsOn = false; 
+        let movementInterval; 
+        let currentActiveDirection = ''; // Hangi yönün aktif olduğunu tutar
+
+        // Durum mesajlarını kaldırıldığı için bu fonksiyonları basitleştiriyorum.
+        // Konsola loglama devam edecek.
+        function setStatus(status, message = '') {
+            console.log(`Durum: ${status}, Mesaj: ${message}`);
+        }
+
+        function setButtonsDisabled(disabled) {
+            headlightsBtn.disabled = disabled;
+            motorSpeedSlider.disabled = disabled; 
+        }
+
+        async function sendMovementCommand(direction) {
+            setStatus(direction, `Robot komutu gönderiliyor: ${direction}`);
+            
+            try {
+                const response = await fetch(
+                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_MOVEMENT}=${direction}`,
+                    { method: 'GET' }
+                );
+
+                if (response.ok) {
+                    setStatus(direction, `Komut başarıyla gönderildi: ${direction}`);
+                } else {
+                    const errorText = await response.text();
+                    setStatus(direction, `Komut gönderilemedi: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
+            }
+        }
+
+        async function toggleHeadlights() {
+            setButtonsDisabled(true); 
+            const newState = !headlightsOn; 
+            setStatus('Farlar', `Farlar ${newState ? 'açılıyor' : 'kapanıyor'}...`);
+
+            try {
+                const response = await fetch(
+                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_HEADLIGHTS}=${newState ? 1 : 0}`,
+                    { method: 'GET' }
+                );
+
+                if (response.ok) {
+                    headlightsOn = newState; 
+                    setStatus('Farlar', `Farlar başarıyla ${newState ? 'açıldı' : 'kapandı'}.`);
+                } else {
+                    const errorText = await response.text();
+                    setStatus('Farlar', `Farlar komutu gönderilemedi: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
+            } finally {
+                setButtonsDisabled(false); 
+            }
+        }
+
+        async function sendMotorSpeed(speedPercentage) {
+            setStatus('Hız Ayarı', `Motor gücü ayarlanıyor: ${speedPercentage}%`);
+            try {
+                const response = await fetch(
+                    `https://blynk.cloud/external/api/update?token=${BLYNK_AUTH_TOKEN}&${VIRTUAL_PIN_MOTOR_SPEED}=${speedPercentage}`,
+                    { method: 'GET' }
+                );
+                if (response.ok) {
+                    setStatus('Hız Ayarı', `Motor gücü başarıyla ayarlandı: ${speedPercentage}%`);
+                } else {
+                    const errorText = await response.text();
+                    setStatus('Hız Ayarı', `Motor gücü gönderilemedi: ${response.status} - ${errorText}`);
+                }
+            } catch (error) {
+                setStatus('Hata!', `Ağ hatası: ${error.message}. Blynk sunucusuna ulaşılamıyor olabilir.`);
+            }
+        }
+
+        function updateMotorSpeed(value) {
+            motorSpeedValueDisplay.textContent = `${value}%`;
+            sendMotorSpeed(value);
+        }
+
+        function startContinuousMove(event, direction) {
+            event.preventDefault(); // Varsayılan davranışı (metin seçimi gibi) engelle
+            console.log(`startContinuousMove tetiklendi: ${direction}`);
+
+            // Eğer zaten bu yönde hareket ediyorsak veya başka bir yönde hareket ediyorsak, tekrar başlatma
+            if (currentActiveDirection === direction) {
+                console.log(`Zaten ${direction} yönünde hareket ediliyor.`);
+                return;
+            }
+            
+            // Önceki interval'i temizle (çift basmayı önlemek için)
+            if (movementInterval) {
+                clearInterval(movementInterval);
+                movementInterval = null;
+                console.log("Önceki hareket interval'i temizlendi.");
+            }
+
+            currentActiveDirection = direction; // Aktif yönü ayarla
+            sendMovementCommand(direction); // İlk komutu hemen gönder
+
+            // Her 200ms'de bir komutu tekrar gönder
+            movementInterval = setInterval(() => {
+                sendMovementCommand(direction);
+            }, 200); 
+        }
+
+        function stopContinuousMove(event) {
+            event.preventDefault(); // Varsayılan davranışı engelle
+            console.log("stopContinuousMove tetiklendi.");
+
+            if (movementInterval) {
+                clearInterval(movementInterval); // Sürekli göndermeyi durdur
+                movementInterval = null; // Interval ID'sini sıfırla
+                console.log("Hareket interval'i durduruldu.");
+            }
+            
+            // Sadece eğer robot aktif bir yönde hareket ediyorsa Durduruldu komutunu gönder
+            if (currentActiveDirection !== '') {
+                sendMovementCommand('Durduruldu'); // Durdurma komutunu gönder
+                currentActiveDirection = ''; // Aktif yönü sıfırla
+                console.log("Durduruldu komutu gönderildi.");
+            }
+        }
+
+        window.onload = () => {
+            motorSpeedSlider.value = 30;
+            updateMotorSpeed(motorSpeedSlider.value);
+        };
+    </script>
 </body>
 </html>
