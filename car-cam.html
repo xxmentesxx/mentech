@@ -1,59 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>ESP32 Robot Kontrol</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Robot Kontrol Paneli</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f0f0f0; }
-    .button-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 20px auto; }
-    .control-button {
-      padding: 20px; background-color: #007bff; color: white; border: none; border-radius: 8px;
-      font-size: 20px; cursor: pointer; text-decoration: none; display: flex; align-items: center;
-      justify-content: center; user-select: none;
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    button {
+      width: 120px; height: 50px;
+      margin: 5px;
+      font-size: 16px;
     }
-    .control-button:active { background-color: #0056b3; }
-    .farlar-container { margin-top: 30px; }
-    .farlar-button {
-      padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px;
-      font-size: 18px; cursor: pointer; margin: 5px;
-    }
-    .farlar-button.off { background-color: #dc3545; }
-    h1 { color: #333; }
+    #speed { width: 250px; }
+    #speedValue { font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>Robot Kontrol</h1>
-  <div class="button-container">
-    <div></div>
-    <a class="control-button" ontouchstart="sendRequest('forward')" ontouchend="sendRequest('stop')" onmousedown="sendRequest('forward')" onmouseup="sendRequest('stop')">İleri</a>
-    <div></div>
 
-    <a class="control-button" ontouchstart="sendRequest('left')" ontouchend="sendRequest('stop')" onmousedown="sendRequest('left')" onmouseup="sendRequest('stop')">Sol</a>
-    <a class="control-button" ontouchstart="sendRequest('stop')" ontouchend="sendRequest('stop')" onmousedown="sendRequest('stop')" onmouseup="sendRequest('stop')">DUR</a>
-    <a class="control-button" ontouchstart="sendRequest('right')" ontouchend="sendRequest('stop')" onmousedown="sendRequest('right')" onmouseup="sendRequest('stop')">Sağ</a>
-
-    <div></div>
-    <a class="control-button" ontouchstart="sendRequest('backward')" ontouchend="sendRequest('stop')" onmousedown="sendRequest('backward')" onmouseup="sendRequest('stop')">Geri</a>
-    <div></div>
+  <!-- Hareket Butonları -->
+  <div>
+    <button id="forward">İleri</button>
+    <button id="backward">Geri</button>
+    <button id="left">Sola Dön</button>
+    <button id="right">Sağa Dön</button>
+    <button id="stop">Durdur</button>
   </div>
 
-  <div class="farlar-container">
-    <h2>Farlar</h2>
-    <button class="farlar-button" onclick="sendRequest('farlarOn')">Farları Aç</button>
-    <button class="farlar-button off" onclick="sendRequest('farlarOff')">Farları Kapat</button>
+  <!-- Hız Kontrol Slider'ı -->
+  <div style="margin-top:20px;">
+    <label for="speed">Hız (%30–100): </label>
+    <input type="range" id="speed" min="30" max="100" value="50">
+    <span id="speedValue">50</span>%
   </div>
 
   <script>
-    // Buraya ESP32'nizin IP adresini girin!
-    // Sizin IP adresiniz: 172.20.10.2
-    const esp32Ip = "172.20.10.2";
+    // 1) Değiştirmeniz gerekenler
+    const AUTH_TOKEN = 'N0zjD19SQgkbPqSTPM40PJjA9JqQAJck';
+    const API_URL    = 'https://blynk.cloud/external/api/update';
 
-    function sendRequest(action) {
-      var xhttp = new XMLHttpRequest();
-      xhttp.open("GET", "http://" + esp32Ip + "/" + action, true);
-      xhttp.send();
-      console.log("Gönderilen istek: " + action);
+    // 2) Komut gönderme fonksiyonu
+    function sendCommand(pin, value) {
+      fetch(`${API_URL}?token=${AUTH_TOKEN}&${pin}=${encodeURIComponent(value)}`)
+        .then(res => console.log(`Gönderildi: ${pin}=${value}`, res.status))
+        .catch(err => console.error(err));
     }
+
+    // 3) Butonlara olay dinleyici atama
+    document.getElementById('forward')
+      .addEventListener('click', () => sendCommand('V0', 'İleri'));
+    document.getElementById('backward')
+      .addEventListener('click', () => sendCommand('V0', 'Geri'));
+    document.getElementById('left')
+      .addEventListener('click', () => sendCommand('V0', 'Sola Dön'));
+    document.getElementById('right')
+      .addEventListener('click', () => sendCommand('V0', 'Sağa Dön'));
+    document.getElementById('stop')
+      .addEventListener('click', () => sendCommand('V0', 'Durduruldu'));
+
+    // 4) Slider ile hız güncelleme
+    const speedSlider  = document.getElementById('speed');
+    const speedDisplay = document.getElementById('speedValue');
+
+    speedSlider.addEventListener('input', () => {
+      speedDisplay.textContent = speedSlider.value;
+      sendCommand('V2', speedSlider.value);
+    });
   </script>
 </body>
 </html>
